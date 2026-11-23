@@ -1,0 +1,18 @@
+# Tier U: per-user service (systemctl --user). Filled in by scripts/service.sh;
+# see ADR-0001 §5. The sockets live in $XDG_RUNTIME_DIR/__NAME__ (0700).
+[Unit]
+Description=delegate-guard daemon (per user)
+Documentation=https://github.com/ckodex-labs/delegate-guard
+
+[Service]
+Type=simple
+ExecStart="__BIN__" serve --socket "%t/__NAME__/hook.sock" --admin-socket "%t/__NAME__/admin.sock" --policy "__POLICY__" --state "__STATE__"
+RuntimeDirectory=__NAME__
+RuntimeDirectoryMode=0700
+UMask=0077
+Restart=always
+RestartSec=1
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=default.target

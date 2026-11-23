@@ -1,0 +1,14 @@
+{
+  "root": {
+    "tools": ["Agent", "Bash", "Glob", "Grep", "Read", "TodoWrite"],
+    "max_calls": 60,
+    "ttl": "1h"
+  },
+  "max_depth": 2,
+  "pending_ttl": "2m",
+  "profiles": {
+    "general-purpose": { "tools": ["Glob", "Grep", "Read"], "max_calls": 6, "ttl": "10m" },
+    "Explore":         { "tools": ["Glob", "Grep", "Read"], "max_calls": 10, "ttl": "10m" },
+    "Plan":            { "tools": ["Glob", "Grep", "Read"], "max_calls": 10, "ttl": "10m" }
+  }
+}

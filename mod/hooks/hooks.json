@@ -1,0 +1,6 @@
+{
+  "description": "delegate-guard: agent.spawn derives each child's grant from its exact parent and reserves its budget; tool.check refuses any call outside its loop's grant. Fails closed.",
+  "modules": [
+    "./register.ts"
+  ]
+}

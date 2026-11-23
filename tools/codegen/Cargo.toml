@@ -1,0 +1,15 @@
+# Protobuf code generator for the admin API. A separate workspace on purpose:
+# its dependencies (protox, prost-build, petgraph, ...) are developer tooling
+# and never enter the product's build graph or Cargo.lock. See ADR-0002.
+[package]
+name = "delegate-guard-codegen"
+version = "0.1.0"
+edition = "2024"
+license = "Apache-2.0"
+publish = false
+
+[workspace]
+
+[dependencies]
+protox = "=0.10.0"
+tonic-prost-build = { version = "=0.14.9", default-features = false }

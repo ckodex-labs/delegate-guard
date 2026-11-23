@@ -1,0 +1,4 @@
+allow-unwrap-in-tests = true
+allow-expect-in-tests = true
+# Project hard limit (CLAUDE.md §4): 50 lines per function.
+too-many-lines-threshold = 50

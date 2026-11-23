@@ -1,0 +1,30 @@
+[package]
+name = "delegate-guard-admin"
+description = "gRPC admin API for the delegate-guard daemon (ckodex.delegateguard.v1.AdminService) over a Unix socket."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+delegate-guard-daemon.workspace = true
+delegate-guard-kernel.workspace = true
+delegate-guard-receipt.workspace = true
+delegate-guard-state.workspace = true
+hyper-util.workspace = true
+jiff.workspace = true
+prost.workspace = true
+tokio.workspace = true
+tokio-stream.workspace = true
+tonic.workspace = true
+tonic-prost.workspace = true
+tower.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
+
+[lints]
+workspace = true

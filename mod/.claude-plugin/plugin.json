@@ -1,0 +1,17 @@
+{
+  "name": "delegate-guard",
+  "version": "0.1.0",
+  "description": "Makes subagent delegation attenuating: each spawned agent (Agent call, fork, teammate or workflow agent) gets its own grant, derived from its exact parent: tools a subset of the parent's, a budget reserved from the parent's pool rather than copied, an expiry no later than the parent's. Every tool call of every loop is checked against its loop's grant at tool.check. Only tightens; fails closed.",
+  "author": {
+    "name": "Noufel Chorfa"
+  },
+  "userConfig": {
+    "policy": {
+      "type": "string",
+      "title": "Delegation policy (JSON)",
+      "description": "root: what the main loop holds. profiles: what each agent type (and the reserved keys fork, teammate, workflow, engine) may ask its parent to delegate. Anything not listed is denied. Same JSON as the delegate-guard command hook.",
+      "required": false,
+      "default": "{\"root\":{\"tools\":[\"Agent\",\"Bash\",\"Edit\",\"Glob\",\"Grep\",\"Read\",\"TodoWrite\",\"Write\"],\"max_calls\":400,\"ttl\":\"8h\"},\"max_depth\":2,\"profiles\":{\"general-purpose\":{\"tools\":[\"Glob\",\"Grep\",\"Read\"],\"max_calls\":40,\"ttl\":\"30m\"},\"Explore\":{\"tools\":[\"Glob\",\"Grep\",\"Read\"],\"max_calls\":60,\"ttl\":\"30m\"},\"Plan\":{\"tools\":[\"Glob\",\"Grep\",\"Read\"],\"max_calls\":60,\"ttl\":\"30m\"},\"engine\":{\"tools\":[\"Edit\",\"Glob\",\"Grep\",\"Read\",\"Write\"],\"max_calls\":30,\"ttl\":\"30m\"}}}"
+    }
+  }
+}

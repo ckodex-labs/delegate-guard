@@ -1,0 +1,52 @@
+# Tier S: system service under the dedicated account. Filled in by
+# scripts/service.sh (as root); see ADR-0001 §5. Callers reach the socket through
+# group __SERVICE_GROUP__ and must also be in --allow-uids. State and policy are
+# owned by __SERVICE_USER__ (0600), so agents running as those callers cannot edit them.
+[Unit]
+Description=delegate-guard daemon (system, dedicated account)
+Documentation=https://github.com/ckodex-labs/delegate-guard
+After=local-fs.target
+
+[Service]
+Type=simple
+User=__SERVICE_USER__
+Group=__SERVICE_GROUP__
+ExecStart="__BIN__" serve --socket /run/__NAME__/hook.sock --socket-mode 660 --allow-uids __ALLOW_UIDS__ --admin-socket /run/__NAME__/admin.sock --policy /etc/__NAME__/policy.json --state /var/lib/__NAME__
+RuntimeDirectory=__NAME__
+RuntimeDirectoryMode=0750
+StateDirectory=__NAME__
+StateDirectoryMode=0700
+UMask=0077
+Restart=always
+RestartSec=1
+
+# The daemon reads its policy, writes its state directory, reads Claude Code's
+# sidecar files under /home (through the ACL from scripts/sidecar-acl.sh) and
+# speaks only AF_UNIX. Everything else is taken away.
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=yes
+PrivateDevices=yes
+PrivateNetwork=yes
+RestrictAddressFamilies=AF_UNIX
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+ProtectProc=invisible
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallFilter=~@privileged
+CapabilityBoundingSet=
+AmbientCapabilities=
+
+[Install]
+WantedBy=multi-user.target

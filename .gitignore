@@ -1,0 +1,10 @@
+# Build output
+target/
+node_modules/
+.DS_Store
+
+# Local Claude Code settings
+.claude/settings.local.json
+
+# First evidence pass, superseded by evidence/upstream-v2 (kept locally)
+evidence/upstream-2026-11-23/

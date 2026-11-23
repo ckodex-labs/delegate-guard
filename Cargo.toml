@@ -1,0 +1,59 @@
+[workspace]
+resolver = "3"
+exclude = ["tools/codegen", "ci"]
+members = ["crates/kernel", "crates/state", "crates/receipt", "crates/hook", "crates/daemon", "crates/admin", "crates/cli"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+# File::lock (flock on Unix) is stable since 1.89.
+rust-version = "1.89"
+publish = false
+license = "Apache-2.0"
+repository = "https://github.com/ckodex-labs/delegate-guard"
+
+[workspace.dependencies]
+delegate-guard-kernel = { path = "crates/kernel" }
+delegate-guard-state = { path = "crates/state" }
+delegate-guard-receipt = { path = "crates/receipt" }
+delegate-guard-hook = { path = "crates/hook" }
+delegate-guard-daemon = { path = "crates/daemon" }
+delegate-guard-admin = { path = "crates/admin" }
+jiff = { version = "=1.0.2", features = ["serde"] }
+tokio = { version = "=1.54.1", default-features = false, features = ["rt", "net", "sync", "macros"] }
+tokio-stream = { version = "=0.1.19", default-features = false, features = ["net"] }
+tonic = { version = "=0.14.9", default-features = false, features = ["transport", "codegen"] }
+tonic-prost = "=0.14.9"
+prost = "=0.14.6"
+hyper-util = { version = "=0.1.21", default-features = false, features = ["tokio"] }
+tower = { version = "=0.5.3", default-features = false, features = ["util"] }
+nix = { version = "=0.32.0", default-features = false, features = ["fs", "socket", "user"] }
+serde = { version = "=1.0.229", features = ["derive"] }
+serde_json = "=1.0.154"
+sha2 = "=0.11.1"
+thiserror = "=2.0.21"
+tempfile = "=3.27.0"
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+mod_module_files = "warn"
+unwrap_used = "deny"
+expect_used = "deny"
+
+# The hook turns a panic into exit 2 (fail closed) with catch_unwind. With
+# panic = "abort" a panic would end the process with a signal, which Claude Code
+# treats as "proceed". Keep unwinding in every profile.
+[profile.dev]
+panic = "unwind"
+
+[profile.release]
+panic = "unwind"
+# A wrapped budget counter could only err toward granting; a checked one
+# panics, which run_hook_guarded turns into exit 2.
+overflow-checks = true
+lto = "fat"
+codegen-units = 1
+strip = "symbols"

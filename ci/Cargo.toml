@@ -1,0 +1,27 @@
+[package]
+name = "delegate-guard-ci"
+description = "The delegate-guard pipeline on the Dagger Rust SDK. Run from the repository root: dagger run cargo run --locked --manifest-path ci/Cargo.toml -- check"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.89"
+license = "Apache-2.0"
+publish = false
+
+# Build tooling with its own lockfile, like tools/codegen: none of these crates
+# is built into or shipped with the product, and the product's deny.toml does
+# not govern them.
+[workspace]
+
+[dependencies]
+dagger-sdk = "=0.21.12"
+eyre = "=0.6.14"
+futures = "=0.3.34"
+tokio = { version = "=1.54.1", features = ["rt", "macros"] }
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"

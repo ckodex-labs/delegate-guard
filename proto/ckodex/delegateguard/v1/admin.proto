@@ -1,0 +1,113 @@
+syntax = "proto3";
+
+// Admin API of the delegate-guard daemon (ADR-0001). Served on its own Unix
+// socket, separate from the hook socket; callers are authenticated by the
+// socket's file mode and the peer's uid. The hook path never depends on it.
+package ckodex.delegateguard.v1;
+
+// Operator view and control of a running daemon.
+service AdminService {
+  // Whether the daemon is serving, and on which policy.
+  rpc Health(HealthRequest) returns (HealthResponse);
+  // Configuration and policy identity of the running daemon.
+  rpc GetStatus(GetStatusRequest) returns (GetStatusResponse);
+  // Every session with state on disk.
+  rpc ListSessions(ListSessionsRequest) returns (ListSessionsResponse);
+  // Checks one session's receipt chain end to end.
+  rpc VerifyReceipts(VerifyReceiptsRequest) returns (VerifyReceiptsResponse);
+  // Re-reads the policy file. An invalid file is rejected and the last valid
+  // policy stays in force.
+  rpc ReloadPolicy(ReloadPolicyRequest) returns (ReloadPolicyResponse);
+}
+
+// Serving condition of the daemon.
+enum ServingStatus {
+  SERVING_STATUS_UNSPECIFIED = 0;
+  // Serving on the policy file as it is on disk.
+  SERVING_STATUS_SERVING = 1;
+  // Serving, but on an older policy: the last reload was rejected.
+  SERVING_STATUS_DEGRADED = 2;
+}
+
+message HealthRequest {}
+
+message HealthResponse {
+  ServingStatus status = 1;
+  // Present when status is DEGRADED.
+  string reason = 2;
+}
+
+message GetStatusRequest {}
+
+message GetStatusResponse {
+  string version = 1;
+  // RFC 3339, UTC.
+  string started_at = 2;
+  string hook_socket = 3;
+  string state_dir = 4;
+  string policy_path = 5;
+  // sha256 of the policy file bytes in force.
+  string policy_sha256 = 6;
+  // RFC 3339, UTC: when the policy in force was loaded.
+  string policy_loaded_at = 7;
+  // Error of the last rejected reload; empty if the last reload applied.
+  string last_reload_error = 8;
+}
+
+message ListSessionsRequest {}
+
+message ListSessionsResponse {
+  repeated SessionSummary sessions = 1;
+}
+
+// One session as stored. file_stem is the session_id when it is plain, or a
+// hash of it otherwise; both are accepted by VerifyReceipts.
+message SessionSummary {
+  string file_stem = 1;
+  uint32 agents = 2;
+  uint32 pending = 3;
+  // Unspent budget of the main thread.
+  int64 root_remaining = 4;
+}
+
+message VerifyReceiptsRequest {
+  // A session_id, or a file_stem from ListSessions.
+  string session_id = 1;
+}
+
+// State of a receipt chain.
+enum ChainState {
+  CHAIN_STATE_UNSPECIFIED = 0;
+  // No receipts yet.
+  CHAIN_STATE_EMPTY = 1;
+  // Every link verified.
+  CHAIN_STATE_INTACT = 2;
+  // A link failed; error says where.
+  CHAIN_STATE_BROKEN = 3;
+}
+
+message VerifyReceiptsResponse {
+  ChainState state = 1;
+  // Records that verified (before the failure, if BROKEN).
+  uint64 valid_records = 2;
+  string head_hash = 3;
+  string error = 4;
+}
+
+message ReloadPolicyRequest {}
+
+// Result of a reload.
+enum ReloadOutcome {
+  RELOAD_OUTCOME_UNSPECIFIED = 0;
+  // The new policy is in force.
+  RELOAD_OUTCOME_APPLIED = 1;
+  // The file was invalid; the previous policy is still in force.
+  RELOAD_OUTCOME_REJECTED = 2;
+}
+
+message ReloadPolicyResponse {
+  ReloadOutcome outcome = 1;
+  // sha256 of the policy in force after this call.
+  string policy_sha256 = 2;
+  string error = 3;
+}
